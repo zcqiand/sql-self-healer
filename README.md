@@ -8,8 +8,9 @@ graph / guardrail / api 模块。
 
 ## 章节映射表
 
-> 占位：后续任务按章节落地进度填充。
-
 | 章节 | 本仓库对应 |
 | ---- | ---------- |
-| _待填_ | _待填_ |
+| 22 动态 Schema 注入 | `schema.py` |
+| 23 自愈状态机 | `graph.py`、`nodes.py`、`state.py` |
+| 24 HITL 安全熔断 | `guardrail.py`、`graph.py`（`should_retry`） |
+| 25 异步并发接口 | `api.py` |
