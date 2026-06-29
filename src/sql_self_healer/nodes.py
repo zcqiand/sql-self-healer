@@ -17,6 +17,7 @@ from __future__ import annotations
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
+from .guardrail import is_destructive
 from .schema import load_schema
 from .state import AgentState
 
@@ -49,7 +50,15 @@ def execute_sql(state: AgentState, db_url: str) -> dict:
     成功：``{"result": <格式化后的行字符串>, "error": ""}``。
     抛 ``SQLAlchemyError``：``{"result": "", "error": <str(exc)>}``。
     引擎无论成败都会 ``dispose``。
+
+    安全围栏：当 ``is_destructive(state["sql"]) and not state["approved"]``
+    时**跳过执行**——返回 ``{"result": "", "error": ""}``，让路由节点
+    ``should_retry`` 把流程引向 ``"human"``（人工审批），从而保证一条未授权的
+    ``DROP`` 永远不会真正落到数据库上。
     """
+    if is_destructive(state["sql"]) and not state.get("approved", False):
+        return {"result": "", "error": ""}
+
     engine = create_engine(db_url)
     try:
         with engine.connect() as conn:
