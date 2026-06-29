@@ -55,6 +55,12 @@ def execute_sql(state: AgentState, db_url: str) -> dict:
     时**跳过执行**——返回 ``{"result": "", "error": ""}``，让路由节点
     ``should_retry`` 把流程引向 ``"human"``（人工审批），从而保证一条未授权的
     ``DROP`` 永远不会真正落到数据库上。
+
+    ``returns_rows`` 守卫：DDL（DROP/CREATE/ALTER）与无返回行的 DML
+    （TRUNCATE、无 WHERE 的 DELETE/UPDATE）在 SQLAlchemy 2.0 下
+    ``result.mappings()`` 会抛「does not return rows」，故先用
+    ``result.returns_rows`` 把这类语句分流到「提交事务、返回 (no rows) 成功态」
+    分支，避免被 except 当成伪错误、误触重试循环。
     """
     if is_destructive(state["sql"]) and not state.get("approved", False):
         return {"result": "", "error": ""}
@@ -63,6 +69,12 @@ def execute_sql(state: AgentState, db_url: str) -> dict:
     try:
         with engine.connect() as conn:
             result = conn.execute(text(state["sql"]))
+            if not result.returns_rows:
+                # DDL/无返回行 DML：SQLAlchemy 2.0 下 mappings() 会抛异常，
+                # 这里显式 commit 让改动落库（SQLite 对 DDL 与无 WHERE 的
+                # DELETE 同样需要显式提交），并以 (no rows) 成功态返回。
+                conn.commit()
+                return {"result": "(no rows)", "error": ""}
             rows = result.mappings().all()
 
         if not rows:
