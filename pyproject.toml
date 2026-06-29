@@ -1,7 +1,7 @@
 [project]
 name = "sql-self-healer"
 version = "1.0.0"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = ["langchain>=0.3", "langgraph>=1.2", "sqlalchemy>=2.0", "aiosqlite", "sqlparse", "fastapi"]
 
 [tool.pytest.ini_options]

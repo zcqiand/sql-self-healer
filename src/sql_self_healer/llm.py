@@ -28,3 +28,22 @@ class FakeLLM:
             self._cursor += 1
             return item
         return self._script[-1]
+
+
+def make_llm():
+    """Demo LLM 工厂。
+
+    无 API Key 时返回 ``FakeLLM``，让 API 服务在「无 Key、无网络」环境下
+    也能跑起来（本书案例仓的默认形态）。
+
+    生产用法：把这里的 ``pass`` 占位换成真实集成——例如把 LangChain 的
+    ``ChatModel`` 包一层适配器，使其符合 ``generate(prompt) -> str`` 的接口。
+    """
+    import os
+
+    if os.getenv("OPENAI_API_KEY") or os.getenv("ANTHROPIC_API_KEY"):
+        pass  # 占位——真实集成见书章节
+    return FakeLLM(script=["SELECT 1 AS result;"])
+
+
+__all__ = ["FakeLLM", "make_llm"]
