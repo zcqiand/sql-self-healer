@@ -46,12 +46,18 @@ def load_schema(db_url: str) -> str:
         for table in table_names:
             parts.append(f"\n## Table: {table}")
             columns = insp.get_columns(table)
-            pk_cols = set(insp.get_pk_constraint(table).get("pk_columns", []) or [])
+            # SQLAlchemy 2.0 中 get_pk_constraint 返回字典的标准 key 是
+            # constrained_columns（实测 {'constrained_columns': ['id'], ...}）。
+            # 旧代码误用 pk_columns 导致 .get 永远返回 None，[PK] 标记丢失。
+            pk_cols = set(insp.get_pk_constraint(table).get("constrained_columns", []) or [])
 
             parts.append("Columns:")
             for col in columns:
                 pk_marker = " [PK]" if col["name"] in pk_cols else ""
-                nullable = "NULL" if col.get("nullable", True) else "NOT NULL"
+                # SQLite 反射 INTEGER PRIMARY KEY 时 nullable=True（方言怪癖），
+                # 对读者反直觉；主键在语义上必须 NOT NULL，这里强制纠正显示。
+                is_pk = col["name"] in pk_cols or col.get("primary_key")
+                nullable = "NOT NULL" if is_pk else ("NULL" if col.get("nullable", True) else "NOT NULL")
                 col_type = str(col.get("type", "UNKNOWN"))
                 parts.append(
                     f"  - {col['name']}: {col_type} {nullable}{pk_marker}"

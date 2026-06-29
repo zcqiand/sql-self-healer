@@ -25,3 +25,13 @@ def test_get_sample_data_returns_rows(tmp_path):
     rows = get_sample_data(db_url, "users", n=3)
     assert len(rows) == 2
     assert rows[0]["name"] in ("alice", "bob")
+
+
+def test_load_schema_marks_primary_key(tmp_path):
+    # 回归测试：确保 [PK] 标记出现且 PK 列强制显示为 NOT NULL。
+    # 旧代码用错误的字典 key（pk_columns）导致标记永久丢失。
+    db_url = f"sqlite:///{tmp_path}/test.db"
+    _setup(db_url)
+    schema_str = load_schema(db_url)
+    assert "[PK]" in schema_str
+    assert "id: INTEGER NOT NULL [PK]" in schema_str
