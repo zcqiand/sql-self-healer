@@ -20,7 +20,7 @@ def _initial(query="列出用户", approved=True):
 def test_self_heal_loop(tmp_path):
     db = _db(tmp_path)
     llm = FakeLLM(script=["SELECT FROM broken", "SELECT * FROM users"])  # bad → good
-    g = build_graph(llm=llm, db_url=db)
+    g = build_graph(llm=llm, DATABASE_URL=db)
     out = g.invoke(_initial())
     assert out["error"] == ""
     assert out["result"] != ""   # healed and executed successfully
@@ -29,7 +29,7 @@ def test_self_heal_loop(tmp_path):
 def test_destructive_routes_to_human_not_executed(tmp_path):
     db = _db(tmp_path)
     llm = FakeLLM(script=["DROP TABLE users"])
-    g = build_graph(llm=llm, db_url=db)
+    g = build_graph(llm=llm, DATABASE_URL=db)
     out = g.invoke(_initial(query="删表", approved=False))
     # destructive + not approved → human (END), table must still exist (not dropped)
     assert inspect(create_engine(db)).get_table_names()  # users still there

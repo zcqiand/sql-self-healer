@@ -17,7 +17,7 @@
 2. **``"retry"``** —— 执行报错且仍在重试预算内（``error`` 且 ``retries < MAX_RETRIES``）。
 3. **``"end"``** —— 其余情形（成功，或重试次数用尽）。
 
-``build_graph`` 用 ``functools.partial`` 把 ``llm`` / ``db_url`` 绑定进各节点，
+``build_graph`` 用 ``functools.partial`` 把 ``llm`` / ``DATABASE_URL`` 绑定进各节点，
 让它们退化成「只接受 ``state`` 一个参数」的真正 LangGraph 节点；再按拓扑连边、
 挂条件路由、编译返回。
 """
@@ -52,17 +52,17 @@ def should_retry(state: AgentState) -> str:
     return "end"
 
 
-def build_graph(llm, db_url: str, checkpointer=None):
+def build_graph(llm, DATABASE_URL: str, checkpointer=None):
     """构建并编译自愈状态机。
 
-    用 ``functools.partial`` 把 ``llm`` / ``db_url`` 绑到节点上，使其只剩
+    用 ``functools.partial`` 把 ``llm`` / ``DATABASE_URL`` 绑到节点上，使其只剩
     ``state`` 一个入参（LangGraph 节点契约）；再按拓扑连边、加条件路由，
     最后以可选 ``checkpointer`` 编译返回 ``CompiledGraph``。
     """
     graph = StateGraph(AgentState)
 
-    graph.add_node("generate_sql", functools.partial(generate_sql, llm=llm, db_url=db_url))
-    graph.add_node("execute_sql", functools.partial(execute_sql, db_url=db_url))
+    graph.add_node("generate_sql", functools.partial(generate_sql, llm=llm, DATABASE_URL=DATABASE_URL))
+    graph.add_node("execute_sql", functools.partial(execute_sql, DATABASE_URL=DATABASE_URL))
     graph.add_node("reflect_and_rewrite", functools.partial(reflect_and_rewrite, llm=llm))
 
     graph.add_edge(START, "generate_sql")

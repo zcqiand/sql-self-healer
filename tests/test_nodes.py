@@ -22,20 +22,20 @@ def _db(tmp_path):
 def test_generate_sql_uses_llm(tmp_path):
     db = _db(tmp_path)
     llm = FakeLLM(script=["SELECT * FROM users LIMIT 1"])
-    out = generate_sql(_state(query="列出用户"), llm=llm, db_url=db)
+    out = generate_sql(_state(query="列出用户"), llm=llm, DATABASE_URL=db)
     assert out["sql"] == "SELECT * FROM users LIMIT 1"
 
 
 def test_execute_sql_captures_error(tmp_path):
     db = _db(tmp_path)
-    out = execute_sql(_state(sql="SELECT FROM broken_table"), db_url=db)
+    out = execute_sql(_state(sql="SELECT FROM broken_table"), DATABASE_URL=db)
     assert out["error"] != ""
     assert out["result"] == ""
 
 
 def test_execute_sql_returns_result(tmp_path):
     db = _db(tmp_path)
-    out = execute_sql(_state(sql="SELECT 1 AS one"), db_url=db)
+    out = execute_sql(_state(sql="SELECT 1 AS one"), DATABASE_URL=db)
     assert out["error"] == ""
     assert "one" in (out["result"] or "")
 

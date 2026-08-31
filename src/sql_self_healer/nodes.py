@@ -3,7 +3,7 @@
 每个节点都是纯函数：读取所需状态字段，返回一个**部分状态字典**，
 LangGraph 在合并时会把这些字段写回全局 ``AgentState``。
 
-为了能脱离图独立测试，节点显式接收 ``llm`` 与 ``db_url`` 参数；
+为了能脱离图独立测试，节点显式接收 ``llm`` 与 ``DATABASE_URL`` 参数；
 后续 ``graph.py``（更后的任务）会用 ``functools.partial`` 把它们
 绑定成「只接受 ``state`` 一个参数」的真正 LangGraph 节点。
 
@@ -22,16 +22,16 @@ from .schema import load_schema
 from .state import AgentState
 
 
-def generate_sql(state: AgentState, llm, db_url: str) -> dict:
+def generate_sql(state: AgentState, llm, DATABASE_URL: str) -> dict:
     """调用 LLM 把自然语言查询翻译成 SQL。
 
-    提示词注入 ``load_schema(db_url)`` 反射出的表结构与样例数据，
+    提示词注入 ``load_schema(DATABASE_URL)`` 反射出的表结构与样例数据，
     以及用户的自然语言 ``state["query"]``，再交给 ``llm.generate``
     产出可执行 SQL。
 
     返回部分状态 ``{"sql": <LLM 输出>}``。
     """
-    schema = load_schema(db_url)
+    schema = load_schema(DATABASE_URL)
     prompt = (
         "You are a SQL expert. Given the database schema below and a "
         "natural-language question, output ONLY the single SQL statement "
@@ -44,7 +44,7 @@ def generate_sql(state: AgentState, llm, db_url: str) -> dict:
     return {"sql": sql}
 
 
-def execute_sql(state: AgentState, db_url: str) -> dict:
+def execute_sql(state: AgentState, DATABASE_URL: str) -> dict:
     """执行 ``state["sql"]``，返回结果行或报错信息。
 
     成功：``{"result": <格式化后的行字符串>, "error": ""}``。
@@ -65,7 +65,7 @@ def execute_sql(state: AgentState, db_url: str) -> dict:
     if is_destructive(state["sql"]) and not state.get("approved", False):
         return {"result": "", "error": ""}
 
-    engine = create_engine(db_url)
+    engine = create_engine(DATABASE_URL)
     try:
         with engine.connect() as conn:
             result = conn.execute(text(state["sql"]))

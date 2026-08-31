@@ -27,7 +27,7 @@ def test_query_endpoint(tmp_path):
         client = TestClient(app)
         resp = client.post(
             "/query",
-            json={"query": "列出用户", "tenant_id": "t1", "db_url": db},
+            json={"query": "列出用户", "tenant_id": "t1", "DATABASE_URL": db},
         )
         assert resp.status_code == 200
         body = resp.json()

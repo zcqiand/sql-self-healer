@@ -17,7 +17,7 @@ from sql_self_healer.nodes import execute_sql
 
 
 def _db_with_users(tmp_path) -> str:
-    """建一个带 users 表（含两行）的临时 sqlite 库，返回 db_url。"""
+    """建一个带 users 表（含两行）的临时 sqlite 库，返回 DATABASE_URL。"""
     db = f"sqlite:///{tmp_path}/t.db"
     eng = create_engine(db)
     with eng.connect() as c:

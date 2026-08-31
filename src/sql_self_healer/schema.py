@@ -11,12 +11,12 @@ import sqlalchemy
 from sqlalchemy import create_engine, inspect, text
 
 
-def get_sample_data(db_url: str, table: str, n: int = 3) -> list[dict]:
+def get_sample_data(DATABASE_URL: str, table: str, n: int = 3) -> list[dict]:
     """Return up to ``n`` sample rows from ``table`` as a list of dicts.
 
     Uses SQLAlchemy 2.0 style execution: ``text()`` + ``.mappings().all()``.
     """
-    engine = create_engine(db_url)
+    engine = create_engine(DATABASE_URL)
     try:
         with engine.connect() as conn:
             result = conn.execute(text(f"SELECT * FROM {table} LIMIT {n}"))
@@ -26,14 +26,14 @@ def get_sample_data(db_url: str, table: str, n: int = 3) -> list[dict]:
         engine.dispose()
 
 
-def load_schema(db_url: str) -> str:
+def load_schema(DATABASE_URL: str) -> str:
     """Introspect the database and return a schema description string.
 
     Enumerates each table's columns (name, type, nullable, primary key)
     and appends a few sample rows per table so the LLM can ground its
     SQL generation in the actual structure and data.
     """
-    engine = create_engine(db_url)
+    engine = create_engine(DATABASE_URL)
     try:
         insp = inspect(engine)
         table_names = insp.get_table_names()
@@ -64,7 +64,7 @@ def load_schema(db_url: str) -> str:
                 )
 
             # Sample rows to help the LLM ground its SQL.
-            sample = get_sample_data(db_url, table, n=3)
+            sample = get_sample_data(DATABASE_URL, table, n=3)
             if sample:
                 parts.append(f"Sample rows ({len(sample)}):")
                 for row in sample:
