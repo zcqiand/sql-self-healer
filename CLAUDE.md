@@ -1,6 +1,6 @@
 # sql-self-healer — 仓库工作约定（供 Claude Code）
 
-本仓为《Codex 从入门到项目实践》卷四案例仓（自然语言转 SQL 自愈）的可运行配套工程，是书稿代码块的 **source of truth**。
+独立项目（不受 suite 门禁）：自然语言转 SQL + 报错自愈的 LangGraph Agent。
 
 ## 项目定位
 
@@ -37,12 +37,12 @@ sql-self-healer/
 ├── CLAUDE.md
 ├── version-lock.json
 ├── src/
-│   ├── schema.py                  ← Ch22 动态 Schema 注入
+│   ├── schema.py                  ← 动态 Schema 注入
 │   ├── state.py
-│   ├── graph.py                   ← Ch23 自愈状态机
+│   ├── graph.py                   ← 自愈状态机
 │   ├── nodes.py
-│   ├── guardrail.py               ← Ch24 HITL 安全熔断
-│   └── api.py                     ← Ch25 异步并发接口
+│   ├── guardrail.py               ← HITL 安全熔断
+│   └── api.py                     ← 异步并发接口
 └── tests/
 ```
 
