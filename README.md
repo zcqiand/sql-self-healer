@@ -37,6 +37,17 @@ pytest -q                   # 跑全部测试（FakeLLM，无需 API Key）
 | 24 | HITL 安全熔断 | `guardrail.py`, `graph.py`（`should_retry`） |
 | 25 | 异步并发接口 | `api.py` |
 
+### 书一《AI智能体从入门到项目实践》（卷四）
+
+- 书稿定位：xr-know-008，第 22、23、24、25 章正文代码块挂本仓 `source=` 锚点
+- 配套版本：未冻结 tag（历史绑定，以 registry 登记为准）
+
+| 章 | 章题 | 对应源文件 |
+| :--- | :--- | :--- |
+| 22 | SQL 自愈案例开篇：动态 Schema 注入 | `src/sql_self_healer/schema.py` |
+| 23 | 自愈状态机：让 SQL 报错后自己改自己 | `src/sql_self_healer/graph.py` + `src/sql_self_healer/nodes.py` + `src/sql_self_healer/state.py` |
+| 24 | HITL 安全熔断：给自愈状态机装上护栏 | `src/sql_self_healer/guardrail.py` + `src/sql_self_healer/nodes.py` + `src/sql_self_healer/graph.py` |
+| 25 | 异步并发接口：把自愈 Agent 部署成服务 | `src/sql_self_healer/api.py` + `tests/test_api.py` |
 ## 快速链接
 
 - [功能规格文档.md](功能规格文档.md) — 功能名称、描述与验收标准
